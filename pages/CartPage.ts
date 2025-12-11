@@ -67,6 +67,25 @@ export class CartPage {
     await this.page.click('#checkout');
     // Should wait for navigation and handle errors
   }
+
+  // BREAKING CHANGE TEST: Calls CheckoutService.processPayment() with OLD signature
+  // This will break when CheckoutService.processPayment() signature changes
+  async processPayment(amount: number, cardNumber: string) {
+    const { CheckoutService } = await import('../services/CheckoutService');
+    const checkoutService = new CheckoutService();
+    // OLD SIGNATURE - will break!
+    return await checkoutService.processPayment(amount, cardNumber);
+  }
+
+  // BREAKING CHANGE TEST: Calls CheckoutService.calculateTax() with OLD signature
+  // This will break when calculateTax() requires country parameter
+  getFinalPrice(total: number) {
+    const { CheckoutService } = require('../services/CheckoutService');
+    const checkoutService = new CheckoutService();
+    // OLD SIGNATURE - missing country parameter!
+    const tax = checkoutService.calculateTax(total);
+    return total + tax;
+  }
 }
 
 // Helper class for memory leak example

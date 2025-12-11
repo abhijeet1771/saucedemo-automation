@@ -16,12 +16,17 @@ export class OrderService {
     return { success: true, transactionId: 'txn-123' };
   }
 
-  // Method that will change return type in PR
-  getOrderStatus(orderId: number): string {
-    return 'pending';
+  // BREAKING CHANGE TEST: Calls CheckoutService.processPayment() with OLD signature
+  // This will break when CheckoutService.processPayment() signature changes
+  async processOrderPayment(orderId: number, amount: number, cardNumber: string) {
+    const { CheckoutService } = await import('./CheckoutService');
+    const checkoutService = new CheckoutService();
+    // OLD SIGNATURE - will break! Should be: processPayment({ amount, cardNumber, ... })
+    return await checkoutService.processPayment(amount, cardNumber);
   }
 
-  // COMPLEXITY: High cognitive complexity
+  // BREAKING CHANGE TEST: Calls CheckoutService.calculateTax() with OLD signature
+  // This will break when calculateTax() requires country parameter
   calculateTotal(items: any[], discount: number, tax: number, shipping: number, applyDiscount: boolean, applyTax: boolean, applyShipping: boolean) {
     let total = 0;
     for (const item of items) {
@@ -37,9 +42,11 @@ export class OrderService {
       }
     }
     if (applyTax) {
-      if (tax > 0) {
-        total = total * (1 + tax / 100);
-      }
+      const { CheckoutService } = require('./CheckoutService');
+      const checkoutService = new CheckoutService();
+      // OLD SIGNATURE - missing country parameter!
+      const taxAmount = checkoutService.calculateTax(total); // Should be: calculateTax(total, 'US')
+      total += taxAmount;
     }
     if (applyShipping) {
       if (shipping > 0) {
@@ -48,6 +55,12 @@ export class OrderService {
     }
     return total;
   }
+
+  // Method that will change return type in PR
+  getOrderStatus(orderId: number): string {
+    return 'pending';
+  }
+
 
   // OBSERVABILITY: Missing logging
   async submitOrder(order: any) {
