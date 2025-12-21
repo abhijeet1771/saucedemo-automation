@@ -6,14 +6,40 @@ export class CartPage {
     this.page = page;
   }
 
-  // DUPLICATE: Same as ProductPage.getCartCount()
+  // LOCATOR ISSUE: Good locator (should be kept)
   async getCartCount() {
     return await this.page.locator('.shopping_cart_badge').textContent();
   }
 
-  // DUPLICATE: Same as ProductPage.navigateToCart()
+  // LOCATOR ISSUE: Brittle XPath locator (ARCHON should flag this)
   async navigateToCart() {
-    await this.page.click('.shopping_cart_link');
+    // BAD: Brittle XPath - position-based, will break if DOM changes
+    await this.page.locator('//div[@class="shopping_cart_container"]/a').click();
+  }
+
+  // LOCATOR ISSUE: Complex CSS selector (ARCHON should suggest optimization)
+  async getCartItemByName(name: string) {
+    // BAD: Overly complex selector chain
+    return await this.page.locator(`.cart_item:has(.inventory_item_name:has-text("${name}")) .inventory_item_price`);
+  }
+
+  // LOCATOR ISSUE: Dynamic ID locator (unstable)
+  async removeItemByDynamicId(itemId: string) {
+    // BAD: Dynamic IDs change on every page load
+    await this.page.locator(`#item-${itemId}-remove-btn`).click();
+  }
+
+  // LOCATOR ISSUE: nth-child positioning (brittle)
+  async selectItemByPosition(position: number) {
+    // BAD: Position-based selection breaks when items are reordered
+    await this.page.locator(`.cart_item:nth-child(${position}) input[type="checkbox"]`).check();
+  }
+
+  // LOCATOR ISSUE: No accessibility attributes (ARCHON should suggest data-testid)
+  async updateQuantity(itemName: string, quantity: number) {
+    // BAD: No test ID or accessibility attributes
+    const itemRow = this.page.locator('.cart_item').filter({ hasText: itemName });
+    await itemRow.locator('.cart_quantity input').fill(quantity.toString());
   }
 
   // PERFORMANCE: Inefficient array operations

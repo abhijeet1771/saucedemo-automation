@@ -1,24 +1,32 @@
-// BREAKING CHANGE: This will be modified in PR to test breaking change detection
+// BREAKING CHANGES INTRODUCED: Testing ARCHON breaking change detection
 export class OrderService {
-  // Original method signature (in master)
-  async createOrder(userId: number, items: any[]): Promise<any> {
+  // BREAKING CHANGE: Method signature completely changed
+  async createOrder(orderData: {userId: number, items: any[], metadata?: any}): Promise<{orderId: string, status: string}> {
+    // SECURITY ISSUE: Hardcoded API key
+    const apiKey = "sk-1234567890abcdef"; // This should be detected
+
     return {
-      orderId: Math.random(),
-      userId: userId,
-      items: items,
-      status: 'pending'
+      orderId: `order-${Math.random().toString(36).substr(2, 9)}`,
+      status: 'created'
     };
   }
 
-  // Method that will be changed in PR (visibility change)
-  public processPayment(orderId: number, amount: number) {
-    // Payment processing
+  // BREAKING CHANGE: Changed from public to private
+  private processPayment(orderId: number, amount: number) {
+    // ARCHITECTURAL ISSUE: Direct database call in service layer
+    const db = require('some-db-lib');
     return { success: true, transactionId: 'txn-123' };
   }
 
-  // Method that will change return type in PR
-  getOrderStatus(orderId: number): string {
-    return 'pending';
+  // BREAKING CHANGE: Return type changed from string to object
+  getOrderStatus(orderId: number): {status: string, timestamp: Date} {
+    return { status: 'pending', timestamp: new Date() };
+  }
+
+  // BREAKING CHANGE: Parameter order changed
+  validateOrder(amount: number, currency: string = 'USD', tax?: number): boolean {
+    if (amount < 0) return false;
+    return true;
   }
 
   // COMPLEXITY: High cognitive complexity
@@ -49,12 +57,53 @@ export class OrderService {
     return total;
   }
 
-  // OBSERVABILITY: Missing logging
+  // SECURITY: SQL Injection vulnerability
+  async getOrdersByUser(userId: string) {
+    // SQL INJECTION: Direct string concatenation
+    const query = `SELECT * FROM orders WHERE user_id = '${userId}'`;
+    return this.executeQuery(query);
+  }
+
+  // SECURITY: XSS vulnerability
+  generateOrderHTML(orderId: string, userInput: string) {
+    // XSS: Direct HTML injection
+    return `<div>Order ${orderId}: ${userInput}</div>`;
+  }
+
+  // PERFORMANCE: Memory leak
+  private orderCache = new Map();
+  cacheOrder(order: any) {
+    this.orderCache.set(order.id, order);
+    // MEMORY LEAK: No cleanup, cache grows indefinitely
+  }
+
+  // NULL SAFETY: No null checks
+  processRefund(orderId: string, amount: number) {
+    const order = this.getOrderById(orderId);
+    // NULL SAFETY VIOLATION: No null check before accessing properties
+    return order.status === 'paid' ? amount * 0.9 : 0;
+  }
+
+  // SRE: Missing error handling and SLO definition
   async submitOrder(order: any) {
-    // Should log: "Submitting order: {orderId}"
-    const result = await this.createOrder(order.userId, order.items);
-    // Should log: "Order submitted successfully: {orderId}" or error
-    return result;
+    try {
+      // NO TIMEOUT: Can hang indefinitely
+      const result = await fetch('https://api.payment.com/process', {
+        method: 'POST',
+        body: JSON.stringify(order)
+      });
+      return result.json();
+    } catch (error) {
+      // POOR ERROR HANDLING: Generic catch-all
+      console.log('Error:', error);
+      throw error;
+    }
+  }
+
+  // HERMETIC TESTING VIOLATION: External dependency
+  private executeQuery(query: string) {
+    // External database call makes tests non-hermetic
+    return require('database-driver').query(query);
   }
 }
 
