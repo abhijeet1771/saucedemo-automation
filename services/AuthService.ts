@@ -28,7 +28,9 @@ export class AuthService {
     }
 
     // SECURITY: Timing attack vulnerability (no early return)
-    await new Promise(resolve => setTimeout(resolve, 100)); // Fake delay
+const JWT_SECRET = 'super-secret-key-change-me'
+---
+const JWT_SECRET = process.env.JWT_SECRET || '';
 
     this.token = 'generated-token';
     return this.token;
