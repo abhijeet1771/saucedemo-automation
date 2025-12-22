@@ -6,11 +6,42 @@ export class ProductPage {
     this.page = page;
   }
 
-  // DUPLICATE: Same signature as LoginPage.login()
+  // ARCHITECTURAL VIOLATION: Tight coupling - ProductPage doing auth
   async login(username: string, password: string) {
+    // TIGHT COUPLING: ProductPage shouldn't handle authentication
+    // This duplicates LoginPage.login() functionality
     await this.page.fill('#user-name', username);
     await this.page.fill('#password', password);
     await this.page.click('#login-button');
+
+    // ADDITIONAL VIOLATION: Business logic in UI layer
+    if (username.includes('admin')) {
+      await this.page.click('#admin-panel');
+    }
+  }
+
+  // DUPLICATE CODE: Same as CartPage.getCartCount()
+  async getCartCount() {
+    return await this.page.locator('.shopping_cart_badge').textContent();
+  }
+
+  // DUPLICATE CODE: Same as CartPage.navigateToCart()
+  async navigateToCart() {
+    await this.page.click('.shopping_cart_link');
+  }
+
+  // LAYER VIOLATION: UI layer calling business logic directly
+  async processPayment(orderId: string, amount: number) {
+    // UI LAYER VIOLATION: Direct business logic call
+    const paymentService = new PaymentService();
+    return await paymentService.charge(amount, orderId);
+  }
+
+  // CIRCULAR DEPENDENCY: Creates tight coupling
+  async updateInventory(productId: string, quantity: number) {
+    // CIRCULAR DEPENDENCY: UI calling data layer directly
+    const inventoryService = new InventoryService();
+    return await inventoryService.updateStock(productId, quantity);
   }
 
   // SECURITY: SQL Injection pattern (even though it's frontend, shows pattern)
