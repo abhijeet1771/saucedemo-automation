@@ -1,24 +1,81 @@
+// BREAKING CHANGE: Added new required interface
+export interface OrderItem {
+  productId: string;
+  quantity: number;
+  price: number;
+  name: string;
+}
+
+// BREAKING CHANGE: New required interface
+export interface OrderOptions {
+  priority: 'normal' | 'express' | 'urgent';
+  notes?: string;
+}
+
+// BREAKING CHANGE: Changed return type from any to OrderResult
+export interface OrderResult {
+  orderId: number;
+  userId: number;
+  items: OrderItem[];
+  status: string;
+  createdAt: Date;
+}
+
+// BREAKING CHANGE: New enum for payment methods
+export enum PaymentMethod {
+  CREDIT_CARD = 'credit_card',
+  PAYPAL = 'paypal',
+  BANK_TRANSFER = 'bank_transfer',
+  CRYPTO = 'crypto'
+}
+
+// BREAKING CHANGE: Changed return type from object to PaymentResult
+export interface PaymentResult {
+  success: boolean;
+  transactionId: string;
+  method: PaymentMethod;
+  processedAt: Date;
+}
+
+// BREAKING CHANGE: Changed return type from string to OrderStatus
+export interface OrderStatus {
+  status: 'pending' | 'processing' | 'shipped' | 'delivered';
+  lastUpdated: Date;
+  estimatedDelivery: Date | null;
+}
+
 // BREAKING CHANGE: This will be modified in PR to test breaking change detection
 export class OrderService {
-  // Original method signature (in master)
-  async createOrder(userId: number, items: any[]): Promise<any> {
+  // BREAKING CHANGE: Changed items parameter from any[] to OrderItem[]
+  async createOrder(userId: number, items: OrderItem[], options?: OrderOptions): Promise<OrderResult> {
     return {
       orderId: Math.random(),
       userId: userId,
       items: items,
-      status: 'pending'
+      status: 'pending',
+      createdAt: new Date()
     };
   }
 
-  // Method that will be changed in PR (visibility change)
-  public processPayment(orderId: number, amount: number) {
+  // BREAKING CHANGE: Changed from public to private (visibility change)
+  // BREAKING CHANGE: Added required paymentMethod parameter
+  private processPayment(orderId: number, amount: number, paymentMethod: PaymentMethod): PaymentResult {
     // Payment processing
-    return { success: true, transactionId: 'txn-123' };
+    return {
+      success: true,
+      transactionId: 'txn-123',
+      method: paymentMethod,
+      processedAt: new Date()
+    };
   }
 
-  // Method that will change return type in PR
-  getOrderStatus(orderId: number): string {
-    return 'pending';
+  // BREAKING CHANGE: Changed return type from string to OrderStatus
+  getOrderStatus(orderId: number): OrderStatus {
+    return {
+      status: 'pending',
+      lastUpdated: new Date(),
+      estimatedDelivery: null
+    };
   }
 
   // COMPLEXITY: High cognitive complexity
