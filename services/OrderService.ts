@@ -21,6 +21,21 @@ export class OrderService {
     return 'pending';
   }
 
+  // SECURITY: Command injection vulnerability
+  async executePayment(orderId: number, paymentData: any) {
+    const { amount, method } = paymentData;
+
+    // SECURITY: Command injection - user input passed to shell command
+    const command = `curl -X POST https://payment-gateway.com/pay \\
+      -d "amount=${amount}" \\
+      -d "orderId=${orderId}" \\
+      -H "Authorization: Bearer ${paymentData.token}"`;
+
+    // This could execute: curl ... -d "amount=100; rm -rf /;" ...
+
+    return { success: true };
+  }
+
   // COMPLEXITY: High cognitive complexity
   calculateTotal(items: any[], discount: number, tax: number, shipping: number, applyDiscount: boolean, applyTax: boolean, applyShipping: boolean) {
     let total = 0;

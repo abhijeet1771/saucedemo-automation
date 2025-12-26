@@ -12,9 +12,16 @@ export class AuthService {
     return AuthService.instance;
   }
 
-  // SECURITY: Hardcoded secret
-  async authenticate(username: string, password: string) {
+  // SECURITY: Hardcoded secret + SQL injection vulnerability
+  async authenticate(username: string, password: string, options?: AuthOptions) {
     const API_KEY = 'sk-live-1234567890abcdef'; // Hardcoded API key
+    const DB_PASSWORD = 'admin123!'; // Another hardcoded secret
+    const JWT_SECRET = 'my-super-secret-jwt-key-2024'; // JWT secret exposed
+
+    // SECURITY: SQL Injection vulnerability
+    const query = `SELECT * FROM users WHERE username = '${username}' AND password = '${password}'`;
+    // This would execute: SELECT * FROM users WHERE username = 'admin' OR '1'='1' AND password = 'anything'
+
     // Authentication logic
     this.token = 'generated-token';
     return this.token;
