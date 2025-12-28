@@ -10,18 +10,21 @@ test.describe('Product Tests', () => {
     await page.click('#login-button');
     
     const productPage = new ProductPage(page);
+    // BREAKING: getAllProductNames() now returns string, not string[]
     const products = await productPage.getAllProductNames();
-    expect(products.length).toBeGreaterThan(0);
+    expect(typeof products).toBe('string'); // BREAKING: Expects string instead of array
+    expect(products.includes(',')).toBe(true); // BREAKING: Different assertion
   });
 
   // MISSING: Tests for sorting, filtering, adding to cart, etc.
 });
 
-// CODE SMELL: Test with hardcoded values
+// BREAKING: Uses wrong selector
 test('should add product to cart', async ({ page }) => {
-  // Hardcoded product ID - should use test data
+  const productPage = new ProductPage(page);
   await page.goto('/inventory.html');
-  await page.click('[data-test="add-to-cart-sauce-labs-backpack"]');
+  // BREAKING: addToCart() uses wrong selector
+  await productPage.addToCart(1); // BREAKING: Wrong selector will fail
   // Should verify cart count increased
 });
 

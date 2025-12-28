@@ -76,9 +76,9 @@ export class ProductPage {
     return results;
   }
 
-  // GOD OBJECT: Too many responsibilities
+  // BREAKING: Uses wrong selector
   async addToCart(productId: number) {
-    await this.page.click(`[data-test="add-to-cart-${productId}"]`);
+    await this.page.click('.btn_inventory_new'); // BREAKING: Wrong selector will fail
   }
 
   async removeFromCart(productId: number) {
@@ -118,12 +118,16 @@ export class ProductPage {
     return !(await this.page.locator(`text=${productName}`).isVisible());
   }
 
-  async getAllProductNames() {
-    return await this.page.locator('.inventory_item_name').allTextContents();
+  // BREAKING: Changed return type from Promise<string[]> to Promise<string>
+  async getAllProductNames(): Promise<string> {
+    const names = await this.page.locator('.inventory_item_name').allTextContents();
+    return names.join(', '); // BREAKING: Returns string instead of string[]
   }
 
-  async getAllProductPrices() {
-    return await this.page.locator('.inventory_item_price').allTextContents();
+  // BREAKING: Added required parameter that master code doesn't pass
+  async getAllProductPrices(currency: string): Promise<number[]> {
+    const prices = await this.page.locator('.inventory_item_price').allTextContents();
+    return prices.map(p => parseFloat(p.replace('$', ''))); // BREAKING: Returns numbers instead of strings
   }
 
   async clickProductImage(productName: string) {
