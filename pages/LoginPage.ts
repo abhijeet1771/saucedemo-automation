@@ -18,6 +18,21 @@ export class LoginPage {
     await this.page.click('#login-button');
   }
 
+  // BREAKING CHANGE: New method that calls modified loginToBox function
+  // This will break when loginToBox signature changes
+  async loginToExternalService(serviceName: string) {
+    console.log(`Logging into ${serviceName}...`); // DEBUG CODE
+
+    if (serviceName === 'box') {
+      // BREAKING CHANGE: This call will fail because loginToBox now has different signature
+      // It used to be loginToBox(page, username, password) but now has options parameter
+      const loginToBox = require('../tests/box-login-automation.spec.js').loginToBox;
+      return await loginToBox(this.page, DEFAULT_USERNAME, DEFAULT_PASSWORD);
+    }
+
+    return false;
+  }
+
   // MISSING NULL CHECK - Will throw NPE if page is null
   async getErrorMessage() {
     return this.page.locator('.error-message-container').textContent();

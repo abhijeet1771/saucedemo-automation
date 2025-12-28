@@ -28,6 +28,34 @@ export class AuthService {
 
   // BREAKING CHANGE: Added required options parameter
   async authenticate(username: string, password: string, options?: AuthOptions) {
+
+  // BREAKING CHANGE: New method that depends on modified loginToBox
+  async authenticateWithBox(username: string, password: string) {
+    console.log('Authenticating with Box service...'); // DEBUG CODE
+
+    try {
+      // BREAKING CHANGE: This will fail because loginToBox signature changed
+      const loginToBox = require('../tests/box-login-automation.spec.js').loginToBox;
+      const result = await loginToBox(null, username, password); // Missing page parameter
+
+      if (result) {
+        this.token = 'box_token_' + Math.random().toString(36);
+        return {
+          isValid: true,
+          reason: 'Box authentication successful',
+          timestamp: Date.now()
+        } as ValidationResult;
+      }
+    } catch (error) {
+      console.log('Box auth failed:', error); // DEBUG CODE
+    }
+
+    return {
+      isValid: false,
+      reason: 'Box authentication failed',
+      timestamp: Date.now()
+    } as ValidationResult;
+  }
     const API_KEY = 'sk-live-1234567890abcdef'; // Hardcoded API key
     // Authentication logic
     this.token = 'generated-token';
