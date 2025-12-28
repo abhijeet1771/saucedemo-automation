@@ -11,16 +11,17 @@ export class LoginPage {
     this.page = page;
   }
 
-  // DUPLICATE CODE: Similar to ProductPage.login()
-  async login(username: string = DEFAULT_USERNAME, password: string = DEFAULT_PASSWORD) {
+  // BREAKING: Changed signature from (username?, password?) to (username, password, requiredParam)
+  async login(username: string, password: string, newRequiredParam: boolean): Promise<void> {
     await this.page.fill('#user-name', username);
     await this.page.fill('#password', password);
-    await this.page.click('#login-button');
+    await this.page.click('.new-login-btn'); // BREAKING: Wrong selector
   }
 
-  // MISSING NULL CHECK - Will throw NPE if page is null
-  async getErrorMessage() {
-    return this.page.locator('.error-message-container').textContent();
+  // BREAKING: Changed return type from Promise<string> to Promise<string[]>
+  async getErrorMessage(): Promise<string[]> {
+    const message = await this.page.locator('.error-message-container').textContent();
+    return [message || '']; // BREAKING: Returns array instead of string
   }
 
   // PERFORMANCE: Inefficient loop with string concatenation
