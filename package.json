@@ -1,21 +1,81 @@
 {
-  "name": "saucedemo-automation",
-  "version": "1.0.0",
-  "description": "Playwright TypeScript automation for SauceDemo - Comprehensive test project to exercise all DroogAI features",
-  "main": "index.js",
-  "scripts": {
-    "test": "playwright test",
-    "test:headed": "playwright test --headed",
-    "test:debug": "playwright test --debug",
-    "test:ui": "playwright test --ui"
+  "name": "@saucedemo/enterprise-automation",
+  "version": "2.0.0",
+  "description": "Enterprise-grade Playwright TypeScript automation framework for SauceDemo with advanced AI-driven testing capabilities",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    },
+    "./types": {
+      "types": "./dist/types/index.d.ts"
+    },
+    "./pages": {
+      "types": "./dist/pages/index.d.ts"
+    },
+    "./services": {
+      "types": "./dist/services/index.d.ts"
+    },
+    "./utils": {
+      "types": "./dist/utils/index.d.ts"
+    }
   },
-  "keywords": ["playwright", "automation", "testing", "saucedemo"],
-  "author": "",
+  "scripts": {
+    "build": "tsc && npm run build:types",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "test": "NODE_ENV=test playwright test",
+    "test:headed": "NODE_ENV=test playwright test --headed",
+    "test:debug": "NODE_ENV=test playwright test --debug",
+    "test:ui": "NODE_ENV=test playwright test --ui",
+    "test:coverage": "NODE_ENV=test playwright test --coverage",
+    "test:ci": "NODE_ENV=ci playwright test --reporter=github",
+    "lint": "eslint src/**/*.ts tests/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts tests/**/*.ts --fix",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist coverage .nyc_output",
+    "prepublishOnly": "npm run build && npm test"
+  },
+  "keywords": ["playwright", "automation", "testing", "saucedemo", "enterprise", "ai-driven", "typescript"],
+  "author": "SauceDemo Enterprise Team",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/abhijeet1771/saucedemo-automation.git"
+  },
+  "bugs": {
+    "url": "https://github.com/abhijeet1771/saucedemo-automation/issues"
+  },
+  "homepage": "https://github.com/abhijeet1771/saucedemo-automation#readme",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "lodash": "^4.17.21",
+    "uuid": "^9.0.1",
+    "zod": "^3.22.4"
+  },
   "devDependencies": {
     "@playwright/test": "^1.40.0",
+    "@types/lodash": "^4.14.200",
     "@types/node": "^20.10.0",
+    "@types/uuid": "^9.0.7",
+    "@typescript-eslint/eslint-plugin": "^6.13.0",
+    "@typescript-eslint/parser": "^6.13.0",
+    "eslint": "^8.54.0",
     "typescript": "^5.3.0"
-  }
+  },
+  "peerDependencies": {
+    "@playwright/test": "^1.40.0"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ]
 }
 
